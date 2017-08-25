@@ -68,13 +68,36 @@ class ForisValidator(object):
                     Draft4Validator.check_schema(schema)
                     self.modules[module_name] = schema
 
+    def _load_definitions(self, schema):
+        for _, stored_module in self.modules.items():
+            if "definitions" in stored_module:
+                schema["definitions"].update(stored_module["definitions"])
+
+    def _filter_module(self, module, kind=None, action=None):
+        module = copy.deepcopy(module)
+        if kind:
+            module["oneOf"] = filter(
+                lambda x: kind in x["properties"]["kind"]["enum"], module["oneOf"]
+            )
+        if action:
+            module["oneOf"] = filter(
+                lambda x: action in x["properties"]["action"]["enum"], module["oneOf"]
+            )
+        return module
+
+    def _extend_modules(self, schema, module=None, kind=None, action=None):
+        modules = list(self.modules.keys()) if module is None else [module]
+        for module in modules:
+            if module not in self.modules:
+                raise ModuleNotFound(module)
+            module = self._filter_module(self.modules[module], kind, action)
+            schema["allOf"][1]["oneOf"].extend(module["oneOf"])
+
     def validate(self, msg, module=None, idx=None):
         schema = copy.deepcopy(BASE_SCHEMA)
 
         # load definitions
-        for _, stored_module in self.modules.items():
-            if "definitions" in stored_module:
-                schema["definitions"].update(stored_module["definitions"])
+        self._load_definitions(schema)
 
         if idx is not None:
             del schema["allOf"][1]
@@ -82,10 +105,31 @@ class ForisValidator(object):
             schema_validate(msg, schema)
             return
 
-        modules = list(self.modules.keys()) if module is None else [module]
-        for module in modules:
-            if module not in self.modules:
-                raise ModuleNotFound(module)
-            definitions = self.modules[module]
-            schema["allOf"][1]["oneOf"].extend(definitions["oneOf"])
+        self._extend_modules(schema, module)
+
         schema_validate(msg, schema)
+
+    def _match_base(self, msg):
+        schema = copy.deepcopy(BASE_SCHEMA)
+        del schema["allOf"][1]
+        schema_validate(msg, schema)
+
+    def _match_filtered(self, msg):
+        # suppose that it already matched base
+        schema = copy.deepcopy(BASE_SCHEMA)
+        self._extend_modules(schema, msg["module"], msg["kind"], msg["action"])
+
+        if len(schema["allOf"][1]["oneOf"]) == 1:
+            element = schema["allOf"][1]["oneOf"][0]
+            del schema["allOf"][1]
+            schema["allOf"].append(element)
+        else:
+            # multiple options or no option left - perform ordinary validation
+            self.validate(msg)
+            return
+
+        schema_validate(msg, schema)
+
+    def validate_verbose(self, msg):
+        self._match_base(msg)
+        self._match_filtered(msg)
