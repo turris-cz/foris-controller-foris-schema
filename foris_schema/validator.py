@@ -71,6 +71,11 @@ class ForisValidator(object):
     def validate(self, msg, module=None, idx=None):
         schema = copy.deepcopy(BASE_SCHEMA)
 
+        # load definitions
+        for _, stored_module in self.modules.items():
+            if "definitions" in stored_module:
+                schema["definitions"].update(stored_module["definitions"])
+
         if idx is not None:
             del schema["allOf"][1]
             schema["allOf"].append(self.modules[module]["oneOf"][idx])

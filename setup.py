@@ -39,7 +39,10 @@ setup(
     requires=[
         'jsonschema',
     ],
-    provides=[
-        'foris_schema',
+    setup_requires=[
+        'pytest-runner',
+    ],
+    tests_require=[
+        'pytest',
     ],
 )

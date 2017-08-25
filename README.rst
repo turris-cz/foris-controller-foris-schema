@@ -16,7 +16,7 @@ Installation
 Schema format
 =============
 
-The format should be jsonschema format (Draf 4) and it should fill some extra fields::
+The format should be jsonschema format (Draf 4) and it should fill some mandatory fields e.g.::
 
 	{
 		"oneOf": [
@@ -43,6 +43,23 @@ The format should be jsonschema format (Draf 4) and it should fill some extra fi
 
 The mandatory fields are `kind`, `module`, `action`, optional `data`.
 Note that `module` should be the same as the file name, `action` should be string and `kind` should be one `request`, `reply`, `notification`.
+
+Definitions
+-----------
+Note that every schema file can use local definitions to reuse some parts of the schema::
+
+	{
+		"definitions": {
+		"lower": {
+			"type": "string",
+			"pattern": "^[a-z]+$"
+		},
+		...
+			"small_string": {"$ref": "#/definitions/lower"}
+		...
+	}
+
+For details see https://spacetelescope.github.io/understanding-json-schema/structuring.html
 
 Usage
 =====

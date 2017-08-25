@@ -23,24 +23,27 @@ from foris_schema import ForisValidator
 
 @pytest.fixture(scope="module")
 def validator():
-    return ForisValidator(["tests/schemas/"])
+    return ForisValidator(["tests/schemas/simple/"])
 
 
 def test_schema_load(validator):
     pass
 
+
 def test_request(validator):
     validator.validate({"module": "simple", "kind": "request", "action": "get"})
+
 
 def test_reply(validator):
     validator.validate({
         "module": "simple", "kind": "reply", "action": "get",
-        "data" : {"result": False}
+        "data": {"result": False}
     })
     validator.validate({
         "module": "simple", "kind": "reply", "action": "get",
-        "data" : {"result": True}
+        "data": {"result": True}
     })
+
 
 def test_notification(validator):
     validator.validate({"module": "simple", "kind": "notification", "action": "triggered"})
@@ -53,6 +56,7 @@ def test_notification(validator):
         "data": {"event": ""}
     })
 
+
 def test_unknown_action(validator):
 
     with pytest.raises(ValidationError):
@@ -61,7 +65,7 @@ def test_unknown_action(validator):
     with pytest.raises(ValidationError):
         validator.validate({
             "module": "simple", "kind": "reply", "action": "non-existing",
-            "data" : {"result": True}
+            "data": {"result": True}
         })
 
     with pytest.raises(ValidationError):
@@ -75,11 +79,12 @@ def test_unknown_kind(validator):
     with pytest.raises(ValidationError):
         validator.validate({
             "module": "simple", "kind": "non-existing", "action": "get",
-            "data" : {"result": True}
+            "data": {"result": True}
         })
 
     with pytest.raises(ValidationError):
         validator.validate({"module": "simple", "kind": "non-existing", "action": "get"})
+
 
 def test_unknown_module(validator):
 
@@ -89,7 +94,7 @@ def test_unknown_module(validator):
     with pytest.raises(ValidationError):
         validator.validate({
             "module": "non-existing", "kind": "reply", "action": "get",
-            "data" : {"result": True}
+            "data": {"result": True}
         })
 
     with pytest.raises(ValidationError):
@@ -108,7 +113,7 @@ def test_data_presence(validator):
         })
     validator.validate({
         "module": "simple", "kind": "reply", "action": "get",
-        "data" : {"result": True}
+        "data": {"result": True}
     })
 
     validator.validate({"module": "simple", "kind": "notification", "action": "triggered"})
@@ -126,6 +131,7 @@ def test_data_presence(validator):
             "data": {}
         })
 
+
 def test_no_extra_properties(validator):
     with pytest.raises(ValidationError):
         validator.validate({"module": "simple", "kind": "request", "action": "get", "extra": False})
@@ -133,12 +139,12 @@ def test_no_extra_properties(validator):
     with pytest.raises(ValidationError):
         validator.validate({
             "module": "simple", "kind": "reply", "action": "get",
-            "data" : {"result": False, "extra": False}
+            "data": {"result": False, "extra": False}
         })
     with pytest.raises(ValidationError):
         validator.validate({
             "module": "simple", "kind": "reply", "action": "get", "extra": False,
-            "data" : {"result": False}
+            "data": {"result": False}
         })
 
     with pytest.raises(ValidationError):
@@ -168,16 +174,16 @@ def test_indexed_validator(validator):
     with pytest.raises(ValidationError):
         validator.validate({
             "module": "simple", "kind": "reply", "action": "get",
-            "data" : {"result": False}
+            "data": {"result": False}
         }, "simple", 0)
     validator.validate({
         "module": "simple", "kind": "reply", "action": "get",
-        "data" : {"result": False}
+        "data": {"result": False}
     }, "simple", 1)
     with pytest.raises(ValidationError):
         validator.validate({
             "module": "simple", "kind": "reply", "action": "get",
-            "data" : {"result": False}
+            "data": {"result": False}
         }, "simple", 2)
 
     with pytest.raises(ValidationError):
