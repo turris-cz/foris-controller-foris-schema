@@ -1,4 +1,4 @@
-0.2 (unknown)
+0.2 (2017-08-28)
 ----------------
 
 * json definitions added
