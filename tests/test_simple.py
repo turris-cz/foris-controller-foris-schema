@@ -162,35 +162,3 @@ def test_no_extra_properties(validator):
             "module": "simple", "kind": "notification", "action": "triggered",
             "data": {"extra": False}
         })
-
-
-def test_indexed_validator(validator):
-    validator.validate({"module": "simple", "kind": "request", "action": "get"}, "simple", 0)
-    with pytest.raises(ValidationError):
-        validator.validate({"module": "simple", "kind": "request", "action": "get"}, "simple", 1)
-    with pytest.raises(ValidationError):
-        validator.validate({"module": "simple", "kind": "request", "action": "get"}, "simple", 2)
-
-    with pytest.raises(ValidationError):
-        validator.validate({
-            "module": "simple", "kind": "reply", "action": "get",
-            "data": {"result": False}
-        }, "simple", 0)
-    validator.validate({
-        "module": "simple", "kind": "reply", "action": "get",
-        "data": {"result": False}
-    }, "simple", 1)
-    with pytest.raises(ValidationError):
-        validator.validate({
-            "module": "simple", "kind": "reply", "action": "get",
-            "data": {"result": False}
-        }, "simple", 2)
-
-    with pytest.raises(ValidationError):
-        validator.validate(
-            {"module": "simple", "kind": "notification", "action": "triggered"}, "simple", 0)
-    with pytest.raises(ValidationError):
-        validator.validate(
-            {"module": "simple", "kind": "notification", "action": "triggered"}, "simple", 1)
-    validator.validate(
-        {"module": "simple", "kind": "notification", "action": "triggered"}, "simple", 2)

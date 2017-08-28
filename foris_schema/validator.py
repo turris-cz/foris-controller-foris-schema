@@ -68,6 +68,12 @@ class ForisValidator(object):
                     Draft4Validator.check_schema(schema)
                     self.modules[module_name] = schema
 
+        # Merge modules and create an object
+        schema = copy.deepcopy(BASE_SCHEMA)
+        self._extend_modules(schema)
+        self._load_definitions(schema)
+        self.validator = Draft4Validator(schema)
+
     def _load_definitions(self, schema):
         for _, stored_module in self.modules.items():
             if "definitions" in stored_module:
@@ -93,22 +99,6 @@ class ForisValidator(object):
             module = self._filter_module(self.modules[module], kind, action)
             schema["allOf"][1]["oneOf"].extend(module["oneOf"])
 
-    def validate(self, msg, module=None, idx=None):
-        schema = copy.deepcopy(BASE_SCHEMA)
-
-        # load definitions
-        self._load_definitions(schema)
-
-        if idx is not None:
-            del schema["allOf"][1]
-            schema["allOf"].append(self.modules[module]["oneOf"][idx])
-            schema_validate(msg, schema)
-            return
-
-        self._extend_modules(schema, module)
-
-        schema_validate(msg, schema)
-
     def _match_base(self, msg):
         schema = copy.deepcopy(BASE_SCHEMA)
         del schema["allOf"][1]
@@ -129,6 +119,9 @@ class ForisValidator(object):
             return
 
         schema_validate(msg, schema)
+
+    def validate(self, msg):
+        self.validator.validate(msg)
 
     def validate_verbose(self, msg):
         self._match_base(msg)
