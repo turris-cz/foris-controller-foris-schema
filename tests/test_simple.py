@@ -30,6 +30,10 @@ def test_schema_load(validator):
     pass
 
 
+def test_schema_property(validator):
+    assert isinstance(validator.schema, dict)
+
+
 def test_request(validator):
     validator.validate({"module": "simple", "kind": "request", "action": "get"})
 

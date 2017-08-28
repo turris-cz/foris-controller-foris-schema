@@ -85,7 +85,7 @@ class ForisValidator(object):
         schema = copy.deepcopy(BASE_SCHEMA)
         self._extend_modules(schema)
         self._load_definitions(schema)
-        self.validator = Draft4Validator(schema)
+        self._validator = Draft4Validator(schema)
 
     def _load_definitions(self, schema):
         for _, stored_module in self.modules.items():
@@ -164,8 +164,12 @@ class ForisValidator(object):
 
         schema_validate(msg, schema)
 
+    @property
+    def schema(self):
+        return copy.deepcopy(self._validator.schema)
+
     def validate(self, msg):
-        self.validator.validate(msg)
+        self._validator.validate(msg)
 
     def validate_verbose(self, msg):
         self._match_base(msg)
