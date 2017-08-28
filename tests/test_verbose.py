@@ -19,7 +19,6 @@ import pytest
 from jsonschema import ValidationError
 
 from foris_schema import ForisValidator
-from foris_schema.validator import ModuleNotFound
 
 
 @pytest.fixture(scope="module")
@@ -89,17 +88,21 @@ def test_unknown_kind(validator):
 
 def test_unknown_module(validator):
 
-    with pytest.raises(ModuleNotFound):
-        validator.validate_verbose({"module": "non-existing", "kind": "notification", "action": "triggered"})
+    with pytest.raises(ValidationError) as excinfo:
+        validator.validate_verbose(
+            {"module": "non-existing", "kind": "notification", "action": "triggered"})
+    assert "is not valid under any of the given schemas" in str(excinfo)
 
-    with pytest.raises(ModuleNotFound):
+    with pytest.raises(ValidationError) as excinfo:
         validator.validate_verbose({
-            "module": "non-existing", "kind": "reply", "action": "get",
-            "data": {"result": True}
-        })
+                "module": "non-existing", "kind": "reply", "action": "get",
+                "data": {"result": True}
+            })
+    assert "is not valid under any of the given schemas" in str(excinfo)
 
-    with pytest.raises(ModuleNotFound):
+    with pytest.raises(ValidationError) as excinfo:
         validator.validate_verbose({"module": "non-existing", "kind": "request", "action": "get"})
+    assert "is not valid under any of the given schemas" in str(excinfo)
 
 
 def test_data_presence(validator):

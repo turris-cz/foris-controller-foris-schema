@@ -33,6 +33,7 @@ BASE_SCHEMA = {
                 "data": {"type": "object"},
             },
             "required": ["kind", "module", "action"],
+            "additionalProperties": False,
         },
     },
     "allOf": [
@@ -46,7 +47,19 @@ class ModuleAlreadyLoaded(Exception):
     pass
 
 
-class ModuleNotFound(Exception):
+class SchemaErrorMutipleTypes(Exception):
+    pass
+
+
+class SchemaErrorWrongMessage(Exception):
+    pass
+
+
+class SchemaErrorModuleMismatch(Exception):
+    pass
+
+
+class SchemaErrorDefinitionAlreadyUsed(Exception):
     pass
 
 
@@ -77,6 +90,9 @@ class ForisValidator(object):
     def _load_definitions(self, schema):
         for _, stored_module in self.modules.items():
             if "definitions" in stored_module:
+                for new_definition in stored_module["definitions"].keys():
+                    if new_definition in schema["definitions"]:
+                        raise SchemaErrorDefinitionAlreadyUsed(new_definition)
                 schema["definitions"].update(stored_module["definitions"])
 
     def _filter_module(self, module, kind=None, action=None):
@@ -91,12 +107,40 @@ class ForisValidator(object):
             )
         return module
 
-    def _extend_modules(self, schema, module=None, kind=None, action=None):
-        modules = list(self.modules.keys()) if module is None else [module]
-        for module in modules:
-            if module not in self.modules:
-                raise ModuleNotFound(module)
-            module = self._filter_module(self.modules[module], kind, action)
+    def _check_message_type(self, obj):
+        if "properties" not in obj:
+            raise SchemaErrorWrongMessage("missing properties attribute in: %s" % obj)
+        if not {"kind", "module", "action"}.issubset(obj["properties"].keys()):
+            raise SchemaErrorWrongMessage("kind, module, action are required: %s" % obj)
+        for name in ("kind", "module", "action"):
+            if "enum" not in obj["properties"][name]:
+                raise SchemaErrorWrongMessage("missing enum for %s in: %s" % (name, obj))
+            if len(obj["properties"][name]["enum"]) != 1:
+                raise SchemaErrorWrongMessage(
+                    "only single enum choice allowed for %s in: %s" % (name, obj))
+
+    def _extend_modules(self, schema, module_name=None, kind=None, action=None):
+        modules = list(self.modules.keys()) if module_name is None else [module_name]
+        types = set()
+        for module_name in modules:
+            if module_name in self.modules:
+                module = self._filter_module(self.modules[module_name], kind, action)
+            else:
+                continue
+            # Pefrorm some checks
+            for obj in module["oneOf"]:
+                self._check_message_type(obj)
+                module_name_sch = obj["properties"]["module"]["enum"][0]
+                if module_name != module_name_sch:
+                    raise SchemaErrorModuleMismatch(
+                        "'%s' != '%s'" % (module_name, module_name_sch))
+                kind = obj["properties"]["kind"]["enum"][0]
+                action = obj["properties"]["action"]["enum"][0]
+                if (module_name, kind, action) in types:
+                    raise SchemaErrorMutipleTypes((module_name, kind, action))
+                else:
+                    types.add((module_name, kind, action))
+
             schema["allOf"][1]["oneOf"].extend(module["oneOf"])
 
     def _match_base(self, msg):
