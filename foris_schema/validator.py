@@ -97,14 +97,25 @@ class ForisValidator(object):
 
     def _filter_module(self, module, kind=None, action=None):
         module = copy.deepcopy(module)
-        if kind:
-            module["oneOf"] = filter(
-                lambda x: kind in x["properties"]["kind"]["enum"], module["oneOf"]
+        if kind or action:
+            filtered = filter(
+                lambda x:
+                    "properties" in x and
+                    "module" in x["properties"] and "enum" in x["properties"]["module"] and
+                    "kind" in x["properties"] and "enum" in x["properties"]["kind"] and
+                    "action" in x["properties"] and "enum" in x["properties"]["action"],
+                module["oneOf"]
             )
-        if action:
-            module["oneOf"] = filter(
-                lambda x: action in x["properties"]["action"]["enum"], module["oneOf"]
-            )
+            if kind:
+                filtered = filter(
+                    lambda x: kind in x["properties"]["kind"]["enum"], filtered
+                )
+            if action:
+                filtered = filter(
+                    lambda x: action in x["properties"]["action"]["enum"], filtered
+                )
+            module["oneOf"] = filtered
+
         return module
 
     def _check_message_type(self, obj):
@@ -114,7 +125,7 @@ class ForisValidator(object):
             raise SchemaErrorWrongMessage("kind, module, action are required: %s" % obj)
         for name in ("kind", "module", "action"):
             if "enum" not in obj["properties"][name]:
-                raise SchemaErrorWrongMessage("missing enum for %s in: %s" % (name, obj))
+                continue
             if len(obj["properties"][name]["enum"]) != 1:
                 raise SchemaErrorWrongMessage(
                     "only single enum choice allowed for %s in: %s" % (name, obj))
@@ -127,13 +138,19 @@ class ForisValidator(object):
                 module = self._filter_module(self.modules[module_name], kind, action)
             else:
                 continue
+
             # Pefrorm some checks
             for obj in module["oneOf"]:
                 self._check_message_type(obj)
+                if "enum" not in obj["properties"]["module"]:
+                    continue
                 module_name_sch = obj["properties"]["module"]["enum"][0]
                 if module_name != module_name_sch:
                     raise SchemaErrorModuleMismatch(
                         "'%s' != '%s'" % (module_name, module_name_sch))
+                if "enum" not in obj["properties"]["kind"] \
+                        or "enum" not in obj["properties"]["action"]:
+                    continue
                 kind = obj["properties"]["kind"]["enum"][0]
                 action = obj["properties"]["action"]["enum"][0]
                 if (module_name, kind, action) in types:

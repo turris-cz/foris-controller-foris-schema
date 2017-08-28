@@ -36,13 +36,6 @@ def test_missing_mandatory():
         ForisValidator(["tests/schemas/wrong_schema/mandatory/"])
 
 
-def test_wrong_enum():
-    with pytest.raises(SchemaErrorWrongMessage):
-        ForisValidator(["tests/schemas/wrong_schema/enum1/"])
-    with pytest.raises(SchemaErrorWrongMessage):
-        ForisValidator(["tests/schemas/wrong_schema/enum2/"])
-
-
 def test_module_mismatched():
     with pytest.raises(SchemaErrorModuleMismatch):
         ForisValidator(["tests/schemas/wrong_schema/mismatched/"])
