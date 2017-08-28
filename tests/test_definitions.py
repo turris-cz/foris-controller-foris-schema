@@ -27,7 +27,7 @@ def validator():
 
 
 def test_valid(validator):
-    validator.validate({
+    msg = {
         'kind': 'request',
         'module': 'definitions',
         'action': 'get',
@@ -35,75 +35,96 @@ def test_valid(validator):
             'object1':{'substring': 'bbbcc'},
             'string1': "aaa"
         }
-    })
+    }
+    validator.validate(msg)
+    validator.validate_verbose(msg)
 
 
 def test_wrong_pattern(validator):
+    msg1 = {
+        'kind': 'request',
+        'module': 'definitions',
+        'action': 'get',
+        'data': {
+            'object1':{'substring': 'Bbbcc'},
+            'string1': "aaa"
+        }
+    }
     with pytest.raises(ValidationError):
-        validator.validate({
-            'kind': 'request',
-            'module': 'definitions',
-            'action': 'get',
-            'data': {
-                'object1':{'substring': 'Bbbcc'},
-                'string1': "aaa"
-            }
-        })
+        validator.validate(msg1)
+    with pytest.raises(ValidationError):
+        validator.validate_verbose(msg1)
 
+    msg2 = {
+        'kind': 'request',
+        'module': 'definitions',
+        'action': 'get',
+        'data': {
+            'object1':{'substring': 'bbbcc'},
+            'string1': "Aaa"
+        }
+    }
     with pytest.raises(ValidationError):
-        validator.validate({
-            'kind': 'request',
-            'module': 'definitions',
-            'action': 'get',
-            'data': {
-                'object1':{'substring': 'bbbcc'},
-                'string1': "Aaa"
-            }
-        })
+        validator.validate(msg2)
+    with pytest.raises(ValidationError):
+        validator.validate_verbose(msg2)
 
 
 def test_extra(validator):
+    msg1 = {
+        'kind': 'request',
+        'module': 'definitions',
+        'action': 'get',
+        'data': {
+            'object1':{'substring': 'bbbcc'},
+            'string1': "aaa",
+            'non-existing': "bbb",
+        }
+    }
     with pytest.raises(ValidationError):
-        validator.validate({
-            'kind': 'request',
-            'module': 'definitions',
-            'action': 'get',
-            'data': {
-                'object1':{'substring': 'bbbcc'},
-                'string1': "aaa",
-                'non-existing': "bbb",
-            }
-        })
+        validator.validate(msg1)
+    with pytest.raises(ValidationError):
+        validator.validate_verbose(msg1)
 
+    msg2 = {
+        'kind': 'request',
+        'module': 'definitions',
+        'action': 'get',
+        'data': {
+            'object1':{'substring': 'bbbcc', 'non-existing': "bbb"},
+            'string1': "aaa",
+        }
+    }
     with pytest.raises(ValidationError):
-        validator.validate({
-            'kind': 'request',
-            'module': 'definitions',
-            'action': 'get',
-            'data': {
-                'object1':{'substring': 'bbbcc', 'non-existing': "bbb"},
-                'string1': "aaa",
-            }
-        })
+        validator.validate(msg2)
+    with pytest.raises(ValidationError):
+        validator.validate_verbose(msg2)
+
 
 def test_missing(validator):
+    msg1 = {
+        'kind': 'request',
+        'module': 'definitions',
+        'action': 'get',
+        'data': {
+            'object1':{'substring': 'bbbcc'},
+        }
+    }
     with pytest.raises(ValidationError):
-        validator.validate({
-            'kind': 'request',
-            'module': 'definitions',
-            'action': 'get',
-            'data': {
-                'object1':{'substring': 'bbbcc'},
-            }
-        })
+        validator.validate(msg1)
+    with pytest.raises(ValidationError):
+        validator.validate_verbose(msg1)
 
+    msg2 ={
+        'kind': 'request',
+        'module': 'definitions',
+        'action': 'get',
+        'data': {
+            'object1':{},
+            'string1': "aaa",
+        }
+    }
     with pytest.raises(ValidationError):
-        validator.validate({
-            'kind': 'request',
-            'module': 'definitions',
-            'action': 'get',
-            'data': {
-                'object1':{},
-                'string1': "aaa",
-            }
-        })
+        validator.validate(msg2)
+    with pytest.raises(ValidationError):
+        validator.validate_verbose(msg2)

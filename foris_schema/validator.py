@@ -168,6 +168,7 @@ class ForisValidator(object):
     def _match_filtered(self, msg):
         # suppose that it already matched base
         schema = copy.deepcopy(BASE_SCHEMA)
+        self._load_definitions(schema)
         self._extend_modules(schema, msg["module"], msg["kind"], msg["action"])
 
         if len(schema["allOf"][1]["oneOf"]) == 1:
