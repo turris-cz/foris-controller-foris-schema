@@ -17,8 +17,17 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 #
 
+import os
+
 from setuptools import setup
-from foris_schema import __version__
+
+
+def get_version():
+    with open(os.path.join(os.path.dirname(__file__), "foris_schema", "__init__.py")) as f:
+        for line in f.readlines():
+            if line.startswith("__version__ = "):
+                return line.strip().lstrip('__version__ = "').rstrip('"')
+
 
 DESCRIPTION = """
 Library which validates whether the json matches
@@ -27,7 +36,7 @@ the protocol use between Foris web and a configuration backend.
 
 setup(
     name='foris-schema',
-    version=__version__,
+    version=get_version(),
     author='CZ.NIC, z.s.p.o. (http://www.nic.cz/)',
     author_email='stepan.henek@nic.cz',
     packages=['foris_schema', ],
