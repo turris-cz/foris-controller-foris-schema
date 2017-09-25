@@ -1,3 +1,8 @@
+0.3 (2017-09-25)
+----------------
+
+* json definitions can be read from another directory list
+
 0.2 (2017-08-28)
 ----------------
 
