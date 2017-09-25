@@ -95,9 +95,9 @@ def test_unknown_module(validator):
 
     with pytest.raises(ValidationError) as excinfo:
         validator.validate_verbose({
-                "module": "non-existing", "kind": "reply", "action": "get",
-                "data": {"result": True}
-            })
+            "module": "non-existing", "kind": "reply", "action": "get",
+            "data": {"result": True}
+        })
     assert "is not valid under any of the given schemas" in str(excinfo)
 
     with pytest.raises(ValidationError) as excinfo:
@@ -174,4 +174,5 @@ def test_no_extra_properties(validator):
             "module": "simple", "kind": "notification", "action": "triggered",
             "data": {"extra": False}
         })
-    assert "Additional properties are not allowed" in str(excinfo)
+    assert "Additional properties are not allowed" in str(excinfo) or \
+            "'event' is a required property" in str(excinfo)

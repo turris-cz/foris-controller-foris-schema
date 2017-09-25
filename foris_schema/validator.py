@@ -142,7 +142,7 @@ class ForisValidator(object):
                 filtered = filter(
                     lambda x: action in x["properties"]["action"]["enum"], filtered
                 )
-            module["oneOf"] = filtered
+            module["oneOf"] = list(filtered)
 
         return module
 
