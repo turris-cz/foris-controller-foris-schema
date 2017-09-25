@@ -21,18 +21,25 @@ from jsonschema import ValidationError
 from foris_schema import ForisValidator
 
 
-@pytest.fixture(scope="module")
-def validator():
-    return ForisValidator(["tests/schemas/definitions/"])
+@pytest.fixture(params=["internal", "external"], scope="module")
+def validator(request):
+    if request.param == "internal":
+        yield ForisValidator(["tests/schemas/modules/definitions/"]), "definitions"
+    elif request.param == "external":
+        yield ForisValidator(
+            ["tests/schemas/modules/definitions-external/"],
+            ["tests/schemas/definitions/definitions-external/"]
+        ), "definitions-external"
 
 
 def test_valid(validator):
+    validator, module_name = validator
     msg = {
         'kind': 'request',
-        'module': 'definitions',
+        'module': module_name,
         'action': 'get',
         'data': {
-            'object1':{'substring': 'bbbcc'},
+            'object1': {'substring': 'bbbcc'},
             'string1': "aaa"
         }
     }
@@ -41,12 +48,13 @@ def test_valid(validator):
 
 
 def test_wrong_pattern(validator):
+    validator, module_name = validator
     msg1 = {
         'kind': 'request',
-        'module': 'definitions',
+        'module': module_name,
         'action': 'get',
         'data': {
-            'object1':{'substring': 'Bbbcc'},
+            'object1': {'substring': 'Bbbcc'},
             'string1': "aaa"
         }
     }
@@ -57,10 +65,10 @@ def test_wrong_pattern(validator):
 
     msg2 = {
         'kind': 'request',
-        'module': 'definitions',
+        'module': module_name,
         'action': 'get',
         'data': {
-            'object1':{'substring': 'bbbcc'},
+            'object1': {'substring': 'bbbcc'},
             'string1': "Aaa"
         }
     }
@@ -71,12 +79,13 @@ def test_wrong_pattern(validator):
 
 
 def test_extra(validator):
+    validator, module_name = validator
     msg1 = {
         'kind': 'request',
-        'module': 'definitions',
+        'module': module_name,
         'action': 'get',
         'data': {
-            'object1':{'substring': 'bbbcc'},
+            'object1': {'substring': 'bbbcc'},
             'string1': "aaa",
             'non-existing': "bbb",
         }
@@ -88,10 +97,10 @@ def test_extra(validator):
 
     msg2 = {
         'kind': 'request',
-        'module': 'definitions',
+        'module': module_name,
         'action': 'get',
         'data': {
-            'object1':{'substring': 'bbbcc', 'non-existing': "bbb"},
+            'object1': {'substring': 'bbbcc', 'non-existing': "bbb"},
             'string1': "aaa",
         }
     }
@@ -102,12 +111,13 @@ def test_extra(validator):
 
 
 def test_missing(validator):
+    validator, module_name = validator
     msg1 = {
         'kind': 'request',
-        'module': 'definitions',
+        'module': module_name,
         'action': 'get',
         'data': {
-            'object1':{'substring': 'bbbcc'},
+            'object1': {'substring': 'bbbcc'},
         }
     }
     with pytest.raises(ValidationError):
@@ -117,10 +127,10 @@ def test_missing(validator):
 
     msg2 ={
         'kind': 'request',
-        'module': 'definitions',
+        'module': module_name,
         'action': 'get',
         'data': {
-            'object1':{},
+            'object1': {},
             'string1': "aaa",
         }
     }

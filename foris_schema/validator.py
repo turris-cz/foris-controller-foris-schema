@@ -64,30 +64,58 @@ class SchemaErrorDefinitionAlreadyUsed(Exception):
 
 
 class ForisValidator(object):
-    def __init__(self, schema_paths):
+    def _get_all_jsons_in_dir(self, dir_path):
+        return [
+            f for f in os.listdir(dir_path)
+            if os.path.isfile(os.path.join(dir_path, f)) and f.endswith(".json")
+        ]
+
+    def _load_global_definitions(self, file_path):
+        with open(file_path) as f:
+            schema = json.load(f)
+            Draft4Validator.check_schema(schema)
+            for new_definition, data in schema["definitions"].items():
+                if new_definition in self.definitions:
+                    raise SchemaErrorDefinitionAlreadyUsed(new_definition)
+                self.definitions[new_definition] = data
+
+    def _extend_global_definitions(self, schema):
+        for definition_name, data in self.definitions.items():
+            if definition_name in schema["definitions"]:
+                raise SchemaErrorDefinitionAlreadyUsed(definition_name)
+            schema["definitions"][definition_name] = data
+
+    def __init__(self, schema_paths, definitions_paths=[]):
         self.modules = {}
+        self.definitions = {}
+
+        # Load definition files
+        for path in definitions_paths:
+            for definition_file in self._get_all_jsons_in_dir(path):
+                self._load_global_definitions(os.path.join(path, definition_file))
+
         # Get json files
         for path in schema_paths:
-            names = [
-                f[:-5] for f in os.listdir(path)
-                if os.path.isfile(os.path.join(path, f)) and f.endswith(".json")
-            ]
-
-            for module_name in names:
+            for module_file in self._get_all_jsons_in_dir(path):
+                module_name = module_file[:-5]
                 if module_name in self.modules:
                     raise ModuleAlreadyLoaded(module_name)
-                with open(os.path.join(path, module_name + ".json")) as f:
+                with open(os.path.join(path, module_file)) as f:
                     schema = json.load(f)
-                    Draft4Validator.check_schema(schema)
+                    merged_schema = copy.deepcopy(schema)
+                    merged_schema["definitions"] = merged_schema.get("definitions", {})
+                    merged_schema["definitions"].update(self.definitions)
+                    Draft4Validator.check_schema(merged_schema)
                     self.modules[module_name] = schema
 
         # Merge modules and create an object
         schema = copy.deepcopy(BASE_SCHEMA)
+        self._extend_global_definitions(schema)
         self._extend_modules(schema)
-        self._load_definitions(schema)
+        self._load_module_definitions(schema)
         self._validator = Draft4Validator(schema)
 
-    def _load_definitions(self, schema):
+    def _load_module_definitions(self, schema):
         for _, stored_module in self.modules.items():
             if "definitions" in stored_module:
                 for new_definition in stored_module["definitions"].keys():
@@ -168,7 +196,8 @@ class ForisValidator(object):
     def _match_filtered(self, msg):
         # suppose that it already matched base
         schema = copy.deepcopy(BASE_SCHEMA)
-        self._load_definitions(schema)
+        self._extend_global_definitions(schema)
+        self._load_module_definitions(schema)
         self._extend_modules(schema, msg["module"], msg["kind"], msg["action"])
 
         if len(schema["allOf"][1]["oneOf"]) == 1:

@@ -28,40 +28,61 @@ from foris_schema.validator import (
 
 def test_missing_properties():
     with pytest.raises(SchemaErrorWrongMessage):
-        ForisValidator(["tests/schemas/wrong_schema/properties/"])
+        ForisValidator(["tests/schemas/modules/wrong_schema/properties/"])
 
 
 def test_missing_mandatory():
     with pytest.raises(SchemaErrorWrongMessage):
-        ForisValidator(["tests/schemas/wrong_schema/mandatory/"])
+        ForisValidator(["tests/schemas/modules/wrong_schema/mandatory/"])
 
 
 def test_module_mismatched():
     with pytest.raises(SchemaErrorModuleMismatch):
-        ForisValidator(["tests/schemas/wrong_schema/mismatched/"])
+        ForisValidator(["tests/schemas/modules/wrong_schema/mismatched/"])
 
 
 def test_already_loaded():
     with pytest.raises(ModuleAlreadyLoaded):
         ForisValidator([
-            "tests/schemas/wrong_schema/same1/",
-            "tests/schemas/wrong_schema/same2/",
+            "tests/schemas/modules/wrong_schema/same1/",
+            "tests/schemas/modules/wrong_schema/same2/",
         ])
 
 
 def test_multiple_types():
     with pytest.raises(SchemaErrorMutipleTypes):
-        ForisValidator(["tests/schemas/wrong_schema/multiple/"])
+        ForisValidator(["tests/schemas/modules/wrong_schema/multiple/"])
 
 
 def test_redefinition():
     with pytest.raises(SchemaErrorDefinitionAlreadyUsed):
         ForisValidator([
-            "tests/schemas/wrong_schema/redefinition/redefinition1",
-            "tests/schemas/wrong_schema/redefinition/redefinition2",
+            "tests/schemas/modules/wrong_schema/redefinition/redefinition1",
+            "tests/schemas/modules/wrong_schema/redefinition/redefinition2",
         ])
 
     with pytest.raises(SchemaErrorDefinitionAlreadyUsed):
         ForisValidator([
-            "tests/schemas/wrong_schema/redefinition/redefinition3",
+            "tests/schemas/modules/wrong_schema/redefinition/redefinition3",
         ])
+
+def test_redefinition_external_internal():
+    with pytest.raises(SchemaErrorDefinitionAlreadyUsed):
+        ForisValidator(
+            ["tests/schemas/modules/definitions/",],
+            ["tests/schemas/definitions/definitions-external/", ],
+        )
+        O
+def test_redefinition_two_externals():
+    with pytest.raises(SchemaErrorDefinitionAlreadyUsed):
+        ForisValidator(
+            ["tests/schemas/modules/simple/",],
+            ["tests/schemas/definitions/redefinition/", ],
+        )
+
+def test_redefinition_base():
+    with pytest.raises(SchemaErrorDefinitionAlreadyUsed):
+        ForisValidator(
+            ["tests/schemas/modules/simple/",],
+            ["tests/schemas/definitions/redefinition_base/", ],
+        )

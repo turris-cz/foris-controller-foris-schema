@@ -23,7 +23,7 @@ from foris_schema import ForisValidator
 
 @pytest.fixture(scope="module")
 def validator():
-    return ForisValidator(["tests/schemas/simple/"])
+    return ForisValidator(["tests/schemas/modules/simple/"])
 
 
 def test_schema_load(validator):
