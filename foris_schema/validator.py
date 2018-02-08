@@ -18,7 +18,8 @@ import copy
 import json
 import os
 
-from jsonschema import validate as schema_validate, Draft4Validator, FormatChecker
+from jsonschema import validate as schema_validate, Draft4Validator
+from .custom_format_checkers import FormatChecker
 
 
 BASE_SCHEMA = {
