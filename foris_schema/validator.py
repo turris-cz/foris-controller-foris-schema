@@ -1,5 +1,5 @@
 # foris-schema
-# Copyright (C) 2017 CZ.NIC, z.s.p.o. <http://www.nic.cz>
+# Copyright (C) 2018 CZ.NIC, z.s.p.o. <http://www.nic.cz>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ import copy
 import json
 import os
 
-from jsonschema import validate as schema_validate, Draft4Validator
+from jsonschema import validate as schema_validate, Draft4Validator, FormatChecker
 
 
 BASE_SCHEMA = {
@@ -113,7 +113,7 @@ class ForisValidator(object):
         self._extend_global_definitions(schema)
         self._extend_modules(schema)
         self._load_module_definitions(schema)
-        self._validator = Draft4Validator(schema)
+        self._validator = Draft4Validator(schema, format_checker=FormatChecker())
 
     def _load_module_definitions(self, schema):
         for _, stored_module in self.modules.items():
@@ -191,7 +191,7 @@ class ForisValidator(object):
     def _match_base(self, msg):
         schema = copy.deepcopy(BASE_SCHEMA)
         del schema["allOf"][1]
-        schema_validate(msg, schema)
+        schema_validate(msg, schema, format_checker=FormatChecker())
 
     def _match_filtered(self, msg):
         # suppose that it already matched base
@@ -209,7 +209,7 @@ class ForisValidator(object):
             self.validate(msg)
             return
 
-        schema_validate(msg, schema)
+        schema_validate(msg, schema, format_checker=FormatChecker())
 
     @property
     def schema(self):
