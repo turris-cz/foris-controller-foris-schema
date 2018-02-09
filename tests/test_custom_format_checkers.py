@@ -95,3 +95,28 @@ def test_ipv6prefix(validator):
                 "module": "custom_format_checkers", "kind": "request", "action": "ipv6prefix",
                 "data": {"item": item}
             })
+
+
+def test_macaddress(validator):
+    passing = [
+        "d8:9e:f3:73:05:9c",
+    ]
+    failing = [
+        "d8:9e:f3:g3:05:9c",
+        "d8:9e:f3:73:05",
+        "d8-9e-f3-73-05-9c",
+        "d8:9e:f3:73:05:9c:11",
+    ]
+
+    for item in passing:
+        validator.validate({
+            "module": "custom_format_checkers", "kind": "request", "action": "macaddress",
+            "data": {"item": item}
+        })
+
+    for item in failing:
+        with pytest.raises(ValidationError):
+            validator.validate({
+                "module": "custom_format_checkers", "kind": "request", "action": "macaddress",
+                "data": {"item": item}
+            })

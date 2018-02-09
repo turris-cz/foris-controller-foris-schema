@@ -15,9 +15,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+import re
 import socket
+
 from jsonschema import FormatChecker
 from jsonschema import _format as existing_checkers
+
+
+MAC_RE = r"^([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}$"
 
 
 @FormatChecker.cls_checks("ipv4netmask", (socket.error, ))
@@ -45,3 +50,8 @@ def check_ipv6prefix(value):
     address, prefix = value.rsplit("/", 1)
     prefix_num = int(prefix)
     return existing_checkers.is_ipv6(address) and 0 <= prefix_num and prefix_num <= 128
+
+
+@FormatChecker.cls_checks("macaddress", (ValueError, ))
+def check_macaddress(value):
+    return True if re.match(MAC_RE, value) else False

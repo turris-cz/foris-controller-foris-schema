@@ -53,6 +53,24 @@
             },
             "additionalProperties": false,
             "required": ["data"]
+        },
+        {
+            "description": "Custom checkers macaddress",
+            "properties": {
+                "module": {"enum": ["custom_format_checkers"]},
+                "kind": {"enum": ["request"]},
+                "action": {"enum": ["macaddress"]},
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "item": {"format": "macaddress", "type": "string"}
+                    },
+                    "additionalProperties": false,
+                    "required": ["item"]
+                }
+            },
+            "additionalProperties": false,
+            "required": ["data"]
         }
     ]
 }
