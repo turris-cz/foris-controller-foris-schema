@@ -32,15 +32,32 @@ def test_schema_load(validator):
 
 
 def test_ipv4netmask(validator):
-    validator.validate({
-        "module": "custom_format_checkers", "kind": "request", "action": "ipv4netmask",
-        "data": {"item": "255.255.0.0"}
-    })
-    with pytest.raises(ValidationError):
+    passing = [
+        "0.0.0.0",
+        "255.0.0.0",
+        "255.255.0.0",
+        "255.255.255.0",
+        "255.255.255.255",
+    ]
+    for item in passing:
         validator.validate({
             "module": "custom_format_checkers", "kind": "request", "action": "ipv4netmask",
-            "data": {"item": "192.168.1.1"}
+            "data": {"item": item}
         })
+    failing = [
+        "192.168.1.1",
+        "10.0.0.0",
+        "0.0.0.255",
+        None,
+        0,
+        1,
+    ]
+    for item in failing:
+        with pytest.raises(ValidationError):
+            validator.validate({
+                "module": "custom_format_checkers", "kind": "request", "action": "ipv4netmask",
+                "data": {"item": item}
+            })
 
 
 def test_ipv4prefix(validator):
@@ -52,6 +69,9 @@ def test_ipv4prefix(validator):
         "192.168.1.1",
         "::/128",
         "192.168.1.1/33",
+        None,
+        0,
+        1,
     ]
     for item in passing:
         validator.validate({
@@ -81,6 +101,9 @@ def test_ipv6prefix(validator):
         "x::/64",
         "::/-1",
         "::1",
+        None,
+        0,
+        1,
     ]
 
     for item in passing:
@@ -106,6 +129,9 @@ def test_macaddress(validator):
         "d8:9e:f3:73:05",
         "d8-9e-f3-73-05-9c",
         "d8:9e:f3:73:05:9c:11",
+        None,
+        0,
+        1,
     ]
 
     for item in passing:
