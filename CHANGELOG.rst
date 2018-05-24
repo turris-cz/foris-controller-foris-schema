@@ -1,3 +1,10 @@
+0.5 (2018-05-24)
+----------------
+
+* test updates
+* mac format checker added
+* ipv4prefix, ipv4netmask, ipv6prefix format checkers added
+
 0.4 (2018-02-08)
 ----------------
 
