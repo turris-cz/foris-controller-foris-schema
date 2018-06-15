@@ -1,8 +1,8 @@
 {
     "definitions": {
-        "lower": {
+        "redef": {
             "type": "string",
-            "pattern": "^[a-z]+$"
+            "pattern": "^[A-Z]+$"
         }
     },
     "oneOf": [
@@ -11,7 +11,13 @@
                 "module": {"enum": ["redefinition2"]},
                 "kind": {"enum": ["request"]},
                 "action": {"enum": ["get"]},
-                "data": {"$ref": "#/definitions/lower"}
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "msg": {"$ref": "#/definitions/redef"}
+                    },
+                    "additionalProperties": false
+                }
             },
             "additionalProperties": false
         }

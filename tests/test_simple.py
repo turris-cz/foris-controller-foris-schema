@@ -30,8 +30,10 @@ def test_schema_load(validator):
     pass
 
 
-def test_schema_property(validator):
-    assert isinstance(validator.schema, dict)
+def test_schemas_property(validator):
+    assert isinstance(validator.base_schema, dict)
+    assert isinstance(validator.error_schema, dict)
+    assert isinstance(validator.get_module_schema("simple"), dict)
 
 
 def test_request(validator):
@@ -92,29 +94,36 @@ def test_unknown_kind(validator):
 
 def test_unknown_module(validator):
 
-    with pytest.raises(ValidationError):
-        validator.validate({"module": "non-existing", "kind": "notification", "action": "triggered"})
+    with pytest.raises(ValidationError) as excinfo:
+        validator.validate(
+            {"module": "non-existing", "kind": "notification", "action": "triggered"}
+        )
+    assert "ValidationError: 'non-existing' is not one of ['simple']" in str(excinfo)
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError) as excinfo:
         validator.validate({
             "module": "non-existing", "kind": "reply", "action": "get",
             "data": {"result": True}
         })
+    assert "ValidationError: 'non-existing' is not one of ['simple']" in str(excinfo)
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError) as excinfo:
         validator.validate({"module": "non-existing", "kind": "request", "action": "get"})
+    assert "ValidationError: 'non-existing' is not one of ['simple']" in str(excinfo)
 
 
 def test_data_presence(validator):
     validator.validate({"module": "simple", "kind": "request", "action": "get"})
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError) as excinfo:
         validator.validate(
             {"module": "simple", "kind": "request", "action": "get", "data": {"result": True}})
+    assert "'data' was unexpected" in str(excinfo)
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError) as excinfo:
         validator.validate({
             "module": "simple", "kind": "reply", "action": "get",
         })
+    assert "'data' is a required property" in str(excinfo)
     validator.validate({
         "module": "simple", "kind": "reply", "action": "get",
         "data": {"result": True}
@@ -129,40 +138,48 @@ def test_data_presence(validator):
         "module": "simple", "kind": "notification", "action": "triggered",
         "data": {"event": ""}
     })
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError) as excinfo:
         validator.validate({
             "module": "simple", "kind": "notification", "action": "triggered",
             "data": {}
         })
+    assert "'event' is a required property" in str(excinfo)
 
 
 def test_no_extra_properties(validator):
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError) as excinfo:
         validator.validate({"module": "simple", "kind": "request", "action": "get", "extra": False})
+    assert "Additional properties are not allowed" in str(excinfo)
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError) as excinfo:
         validator.validate({
             "module": "simple", "kind": "reply", "action": "get",
             "data": {"result": False, "extra": False}
         })
-    with pytest.raises(ValidationError):
+    assert "Additional properties are not allowed" in str(excinfo)
+    with pytest.raises(ValidationError) as excinfo:
         validator.validate({
             "module": "simple", "kind": "reply", "action": "get", "extra": False,
             "data": {"result": False}
         })
+    assert "Additional properties are not allowed" in str(excinfo)
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError) as excinfo:
         validator.validate(
             {"module": "simple", "kind": "notification", "action": "triggered", "extra": False})
+    assert "Additional properties are not allowed" in str(excinfo)
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError) as excinfo:
         validator.validate({
             "module": "simple", "kind": "notification", "action": "triggered",
             "data": {"event": "Passed", "extra": False}
         })
+    assert "Additional properties are not allowed" in str(excinfo)
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError) as excinfo:
         validator.validate({
             "module": "simple", "kind": "notification", "action": "triggered",
             "data": {"extra": False}
         })
+    assert "Additional properties are not allowed" in str(excinfo) or \
+        "'event' is a required property" in str(excinfo)

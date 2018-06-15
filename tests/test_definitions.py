@@ -44,7 +44,6 @@ def test_valid(validator):
         }
     }
     validator.validate(msg)
-    validator.validate_verbose(msg)
 
 
 def test_wrong_pattern(validator):
@@ -60,8 +59,6 @@ def test_wrong_pattern(validator):
     }
     with pytest.raises(ValidationError):
         validator.validate(msg1)
-    with pytest.raises(ValidationError):
-        validator.validate_verbose(msg1)
 
     msg2 = {
         'kind': 'request',
@@ -74,8 +71,6 @@ def test_wrong_pattern(validator):
     }
     with pytest.raises(ValidationError):
         validator.validate(msg2)
-    with pytest.raises(ValidationError):
-        validator.validate_verbose(msg2)
 
 
 def test_extra(validator):
@@ -92,8 +87,6 @@ def test_extra(validator):
     }
     with pytest.raises(ValidationError):
         validator.validate(msg1)
-    with pytest.raises(ValidationError):
-        validator.validate_verbose(msg1)
 
     msg2 = {
         'kind': 'request',
@@ -106,8 +99,6 @@ def test_extra(validator):
     }
     with pytest.raises(ValidationError):
         validator.validate(msg2)
-    with pytest.raises(ValidationError):
-        validator.validate_verbose(msg2)
 
 
 def test_missing(validator):
@@ -122,10 +113,8 @@ def test_missing(validator):
     }
     with pytest.raises(ValidationError):
         validator.validate(msg1)
-    with pytest.raises(ValidationError):
-        validator.validate_verbose(msg1)
 
-    msg2 ={
+    msg2 = {
         'kind': 'request',
         'module': module_name,
         'action': 'get',
@@ -136,5 +125,70 @@ def test_missing(validator):
     }
     with pytest.raises(ValidationError):
         validator.validate(msg2)
-    with pytest.raises(ValidationError):
-        validator.validate_verbose(msg2)
+
+
+def test_override():
+    validator = ForisValidator(
+        ["tests/schemas/modules/no_override_definition/"],
+        ["tests/schemas/definitions/override_definition/"],
+    )
+    assert validator.is_valid({
+        "module": "override",
+        "kind": "request",
+        "action": "get",
+        "data": {"msg": "AAAAAA"},
+    })
+    assert not validator.is_valid({
+        "module": "override",
+        "kind": "request",
+        "action": "get",
+        "data": {"msg": "aaaaaa"},
+    })
+
+    validator = ForisValidator(
+        ["tests/schemas/modules/override_definition/"],
+        ["tests/schemas/definitions/override_definition/"],
+    )
+    assert not validator.is_valid({
+        "module": "override",
+        "kind": "request",
+        "action": "get",
+        "data": {"msg": "AAAAAA"},
+    })
+    assert validator.is_valid({
+        "module": "override",
+        "kind": "request",
+        "action": "get",
+        "data": {"msg": "aaaaaa"},
+    })
+
+
+def test_two_modules_with_same_definition():
+    validator = ForisValidator([
+        "tests/schemas/modules/redefinition/redefinition1",
+        "tests/schemas/modules/redefinition/redefinition2",
+    ])
+    assert not validator.is_valid({
+        "module": "redefinition1",
+        "kind": "request",
+        "action": "get",
+        "data": {"msg": "AAAAAA"},
+    })
+    assert validator.is_valid({
+        "module": "redefinition1",
+        "kind": "request",
+        "action": "get",
+        "data": {"msg": "aaaaaa"},
+    })
+    assert not validator.is_valid({
+        "module": "redefinition2",
+        "kind": "request",
+        "action": "get",
+        "data": {"msg": "aaaaaa"},
+    })
+    assert validator.is_valid({
+        "module": "redefinition2",
+        "kind": "request",
+        "action": "get",
+        "data": {"msg": "AAAAAA"},
+    })

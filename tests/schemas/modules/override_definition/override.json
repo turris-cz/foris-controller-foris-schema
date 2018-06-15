@@ -1,0 +1,25 @@
+{
+    "definitions": {
+        "override_type": {
+            "type": "string",
+            "pattern": "^[a-z]+$"
+        }
+    },
+    "oneOf": [
+        {
+            "properties": {
+                "module": {"enum": ["override"]},
+                "kind": {"enum": ["request"]},
+                "action": {"enum": ["get"]},
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "msg": {"$ref": "#/definitions/override_type"}
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        }
+    ]
+}

@@ -1,8 +1,8 @@
 {
     "definitions": {
-        "message": {
+        "override_type": {
             "type": "string",
-            "pattern": "^[a-z]+$"
+            "pattern": "^[A-Z]+$"
         }
     }
 }

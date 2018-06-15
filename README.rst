@@ -41,12 +41,12 @@ The format should be jsonschema format (Draf 4) and it should fill some mandator
 		]
 	}
 
-The mandatory fields are `kind`, `module`, `action`, optional `data`.
+The mandatory fields are `kind`, `module`, `action`, optional `data`, `errors`.
 Note that `module` should be the same as the file name, `action` should be string and `kind` should be one `request`, `reply`, `notification`.
 
 Definitions
 -----------
-Note that every schema file can use local definitions to reuse some parts of the schema::
+Note that every schema file can use global definitions to reuse some parts of the schema::
 
 	{
 		"definitions": {
@@ -69,7 +69,3 @@ To validate::
 	from foris_schema import ForisValidator
 	validator = ForisValidator(["path/to/dir/with/schemas"])
 	validator.validate({"module": "simple", "kind": "request", "action": "get"})
-
-To validate a particular part of the module (to get more verbose output)::
-
-	validator.validate({"module": "simple", "kind": "request", "action": "get"}, "simple", 0)

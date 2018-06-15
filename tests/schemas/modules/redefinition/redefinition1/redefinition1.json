@@ -1,6 +1,6 @@
 {
     "definitions": {
-        "lower": {
+        "redef": {
             "type": "string",
             "pattern": "^[a-z]+$"
         }
@@ -11,7 +11,13 @@
                 "module": {"enum": ["redefinition1"]},
                 "kind": {"enum": ["request"]},
                 "action": {"enum": ["get"]},
-                "data": {"$ref": "#/definitions/lower"}
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "msg": {"$ref": "#/definitions/redef"}
+                    },
+                    "additionalProperties": false
+                }
             },
             "additionalProperties": false
         }
