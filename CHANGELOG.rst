@@ -1,3 +1,13 @@
+0.6 (2018-06-19)
+----------------
+
+* faster validations (splitted into two - basic an per module)
+* schema attribute repalced (base_schema, error_schema, get_module_schema())
+* validate_verbose removed (validate() should be verbose enough)
+* allow definition overrides in modules (it still fails when override appears in global definitions)
+* different error messages `errors` object is place directly in message root instead of inside `data` element
+* is_valid function added (check message validity but doesn't raise an exception)
+
 0.5 (2018-05-24)
 ----------------
 
