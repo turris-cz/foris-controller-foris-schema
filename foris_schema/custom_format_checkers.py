@@ -17,6 +17,7 @@
 
 import re
 import socket
+import struct
 
 from jsonschema import FormatChecker
 from jsonschema import _format as existing_checkers
@@ -28,14 +29,12 @@ MAC_RE = r"^([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}$"
 @FormatChecker.cls_checks("ipv4netmask", (socket.error, TypeError))
 def check_ipv4netmask(value):
     addr = socket.inet_aton(value)
-    was_zero = False
-    for byte in addr:
-        for i in range(8):
-            if not (ord(byte) & 1 << (7-i)):
-                was_zero = True
-            elif was_zero:  # 1 and we have seen zero already
-                return False
-    return True
+    addr_int = struct.unpack("I", addr)[0]
+    bin_repr = "{:b}".format(addr_int)
+    if "0" in bin_repr and bin_repr != "0":
+        return False
+    else:
+        return True
 
 
 @FormatChecker.cls_checks("ipv4prefix", (socket.error, ValueError, AttributeError))
