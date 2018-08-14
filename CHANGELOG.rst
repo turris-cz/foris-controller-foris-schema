@@ -1,3 +1,9 @@
+0.7 (2018-08-14)
+----------------
+
+* CI python3 integration
+* make foris-schema python3 compatible
+
 0.6 (2018-06-19)
 ----------------
 
