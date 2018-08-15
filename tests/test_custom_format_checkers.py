@@ -38,6 +38,7 @@ def test_ipv4netmask(validator):
         "255.255.0.0",
         "255.255.255.0",
         "255.255.255.255",
+        "255.252.0.0",
     ]
     for item in passing:
         validator.validate({
@@ -48,6 +49,7 @@ def test_ipv4netmask(validator):
         "192.168.1.1",
         "10.0.0.0",
         "0.0.0.255",
+        "255.253.0.0",
         None,
         0,
         1,

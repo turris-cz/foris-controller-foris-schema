@@ -29,9 +29,9 @@ MAC_RE = r"^([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}$"
 @FormatChecker.cls_checks("ipv4netmask", (socket.error, TypeError))
 def check_ipv4netmask(value):
     addr = socket.inet_aton(value)
-    addr_int = struct.unpack("I", addr)[0]
-    bin_repr = "{:b}".format(addr_int)
-    if "0" in bin_repr and bin_repr != "0":
+    addr_int = struct.unpack(">I", addr)[0]
+    bin_repr = "{:032b}".format(addr_int)
+    if "0" in bin_repr.rstrip("0"):
         return False
     else:
         return True
