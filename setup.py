@@ -45,7 +45,7 @@ setup(
     license='COPYING',
     description=DESCRIPTION,
     long_description=open('README.rst').read(),
-    requires=[
+    install_requires=[
         'jsonschema',
     ],
     setup_requires=[
