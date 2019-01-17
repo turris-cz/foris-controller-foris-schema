@@ -6,12 +6,13 @@ Library which validates whether the json matches the protocol use between Foris 
 Requirements
 ============
 
+* python3
 * jsonschema
 
 Installation
 ============
 
-	``python setup.py install``
+	``python3 setup.py install``
 
 Schema format
 =============
