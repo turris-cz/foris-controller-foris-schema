@@ -211,8 +211,11 @@ class ForisValidator(object):
                 module_name = module_file[:-5]
                 if module_name in self.validators:
                     raise ModuleAlreadyLoaded(module_name)
-                with open(os.path.join(schema_path, module_file)) as f:
-                    schema = json.load(f)
+                try:
+                    with open(os.path.join(schema_path, module_file)) as f:
+                        schema = json.load(f)
+                except json.JSONDecodeError as e:
+                    print("Json decoding failed: {!r}".format(e))
 
                 # fill-in global definitions (local definitions are not overriden)
                 definitions = schema.get("definitions", {})
