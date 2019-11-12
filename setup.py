@@ -41,7 +41,7 @@ setup(
     author_email='stepan.henek@nic.cz',
     packages=['foris_schema', ],
     scripts=[],
-    url='https://gitlab.labs.nic.cz/turris/foris-schema',
+    url='https://gitlab.labs.nic.cz/turris/foris-controller/foris-schema',
     license='COPYING',
     description=DESCRIPTION,
     long_description=open('README.rst').read(),
