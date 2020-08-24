@@ -1,5 +1,5 @@
 # foris-schema
-# Copyright (C) 2017 CZ.NIC, z.s.p.o. <http://www.nic.cz>
+# Copyright (C) 2017-2020 CZ.NIC, z.s.p.o. <http://www.nic.cz>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -98,18 +98,18 @@ def test_unknown_module(validator):
         validator.validate(
             {"module": "non-existing", "kind": "notification", "action": "triggered"}
         )
-    assert "ValidationError: 'non-existing' is not one of ['simple']" in str(excinfo)
+    assert "ValidationError: \"'non-existing' is not one of ['simple']" in str(excinfo)
 
     with pytest.raises(ValidationError) as excinfo:
         validator.validate({
             "module": "non-existing", "kind": "reply", "action": "get",
             "data": {"result": True}
         })
-    assert "ValidationError: 'non-existing' is not one of ['simple']" in str(excinfo)
+    assert "ValidationError: \"'non-existing' is not one of ['simple']" in str(excinfo)
 
     with pytest.raises(ValidationError) as excinfo:
         validator.validate({"module": "non-existing", "kind": "request", "action": "get"})
-    assert "ValidationError: 'non-existing' is not one of ['simple']" in str(excinfo)
+    assert "ValidationError: \"'non-existing' is not one of ['simple']" in str(excinfo)
 
 
 def test_data_presence(validator):
