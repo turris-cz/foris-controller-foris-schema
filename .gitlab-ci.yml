@@ -4,40 +4,11 @@ variables:
 stages:
   - lint
   - test
+  - build
+  - publish
 
-tests::unit:
-  stage: test
-  image: $IMAGE
-  parallel:
-    matrix:
-      - IMAGE: ['python:3.8-slim', 'python:3.9-slim', 'python:3.10-slim', 'python:3.11-slim']
-  script:
-    - pip install pytest pytest-cov
-    - pip install .
-    - pytest --junitxml=report.xml --cov --cov-report=term --cov-report=xml --cov-append
-  artifacts:
-    reports:
-      junit: report.xml
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage.xml
-  coverage: /^TOTAL.*\s+([^\s]+)%$/
 
-tests::cli:
-  stage: test
-  image: $IMAGE
-  parallel:
-    matrix:
-      - IMAGE: ['python:3.8-slim', 'python:3.9-slim', 'python:3.10-slim', 'python:3.11-slim']
-  script:
-    - pip install pytest pytest-cov
-    - pip install .
-    - pytest tests/test_cli.py
-
-lints::flake8:
-  stage: lint
-  image: python:3.9-slim
-  before_script:
-    - pip install flake8 tox
-  script:
-    - tox -q -e lint
+include:
+  - remote: "https://gitlab.nic.cz/turris/foris-controller/packages/-/raw/master/templates/python/linters.yml"
+  - remote: "https://gitlab.nic.cz/turris/foris-controller/packages/-/raw/master/templates/python/test_and_coverage.yml"
+  - remote: "https://gitlab.nic.cz/turris/foris-controller/packages/-/raw/master/templates/python/build_and_publish.yml"
