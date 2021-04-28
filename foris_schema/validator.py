@@ -1,5 +1,5 @@
 # foris-schema
-# Copyright (C) 2018 CZ.NIC, z.s.p.o. <http://www.nic.cz>
+# Copyright (C) 2018-2021 CZ.NIC, z.s.p.o. <http://www.nic.cz>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@
 import copy
 import json
 import os
+
+from json.decoder import JSONDecodeError
 
 from jsonschema import validate as schema_validate, Draft4Validator, ValidationError
 from .custom_format_checkers import FormatChecker
@@ -133,6 +135,14 @@ class SchemaErrorDefinitionAlreadyUsed(Exception):
     pass
 
 
+class ForisSchemaValidationError(Exception):
+    pass
+
+
+class ForisValidationError(Exception):
+    pass
+
+
 class ForisValidator(object):
 
     @staticmethod
@@ -145,7 +155,12 @@ class ForisValidator(object):
     @staticmethod
     def _load_definitions(definitions, file_path):
         with open(file_path) as f:
-            schema = json.load(f)
+            try:
+                schema = json.load(f)
+            except JSONDecodeError as e:
+                raise ForisValidationError(
+                    "Error loading file {}, reason: {!r}".format(file_path, e)
+                ) from e
             Draft4Validator.check_schema(schema)
             for new_definition, data in schema["definitions"].items():
                 if new_definition in definitions:
@@ -168,7 +183,12 @@ class ForisValidator(object):
             "properties"]["module"]["properties"]["enum"]["items"]["enum"] = [module_name]
 
         # Validate input schema
-        schema_validate(schema, schema_for_schemas)
+        try:
+            schema_validate(schema, schema_for_schemas)
+        except ValidationError as e:
+            raise ForisSchemaValidationError(
+                "Validation of json schema {} failed. Reason: {!r}".format(schema["$schema"], e)
+            ) from e
 
         # Now check for unique combination (module, kind, action)
         used = set()
@@ -215,7 +235,9 @@ class ForisValidator(object):
                     with open(os.path.join(schema_path, module_file)) as f:
                         schema = json.load(f)
                 except json.JSONDecodeError as e:
-                    print("Json decoding failed: {!r}".format(e))
+                    raise ForisSchemaValidationError(
+                        "Validation of json schema {} failed. Reason: {!r}".format(f.name, e)
+                    ) from e
 
                 # fill-in global definitions (local definitions are not overriden)
                 definitions = schema.get("definitions", {})
