@@ -3,10 +3,17 @@ stages:
 
 .run_script: &run_script
   script:
-    - pip install .
     - python setup.py test
 
 test_python3:
-  image: registry.labs.nic.cz/turris/foris-ci/python3
+  image: registry.nic.cz/turris/foris-ci/python3
   stage: test
   <<: *run_script
+
+test_cli:
+  image: 'python:3.6-slim'
+  stage: test
+  script:
+    - pip install pytest
+    - pip install .
+    - pytest tests/test_cli.py 

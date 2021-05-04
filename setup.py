@@ -39,12 +39,15 @@ setup(
     version=get_version(),
     author='CZ.NIC, z.s.p.o. (http://www.nic.cz/)',
     author_email='packaging@turris.cz',
-    packages=['foris_schema', ],
+    packages=[
+        'foris_schema',
+        'foris_schema.cli'
+    ],
     scripts=[],
     url='https://gitlab.nic.cz/turris/foris-controller/foris-schema',
     license='COPYING',
     description=DESCRIPTION,
-    long_description=open('README.rst').read(),
+    long_description=open('README.md').read(),
     install_requires=[
         'jsonschema',
     ],
@@ -54,4 +57,7 @@ setup(
     tests_require=[
         'pytest',
     ],
+    entry_points={
+        'console_scripts': ['foris-schema=foris_schema.cli.__main__:main']
+    }
 )
