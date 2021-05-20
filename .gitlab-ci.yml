@@ -1,18 +1,23 @@
 stages:
   - test
 
-.run_script: &run_script
-  script:
-    - python setup.py test
-
 test_python3:
-  image: registry.nic.cz/turris/foris-ci/python3
   stage: test
-  <<: *run_script
+  image: $IMAGE
+  parallel:
+    matrix:
+      - IMAGE: ['python:3.6-slim', 'python:3.7-slim', 'python:3.8-slim', 'python:3.9-slim']
+  script:
+    - pip install pytest
+    - pip install .
+    - pytest
 
 test_cli:
-  image: 'python:3.6-slim'
   stage: test
+  image: $IMAGE
+  parallel:
+    matrix:
+      - IMAGE: ['python:3.6-slim', 'python:3.7-slim', 'python:3.8-slim', 'python:3.9-slim']
   script:
     - pip install pytest
     - pip install .
