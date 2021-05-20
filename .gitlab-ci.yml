@@ -1,7 +1,7 @@
 stages:
   - test
 
-test_python3:
+tests::unit:
   stage: test
   image: $IMAGE
   parallel:
@@ -17,7 +17,7 @@ test_python3:
       cobertura: coverage.xml
   coverage: /^TOTAL.*\s+([^\s]+)%$/
 
-test_cli:
+tests::cli:
   stage: test
   image: $IMAGE
   parallel:
