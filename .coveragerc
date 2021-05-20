@@ -1,0 +1,10 @@
+[report]
+precision = 1
+show_missing = true
+skip_covered = true
+
+[run]
+include = foris_schema/
+omit =
+  tests/*
+  foris_schema/cli/__main__.py

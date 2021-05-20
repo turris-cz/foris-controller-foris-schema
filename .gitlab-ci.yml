@@ -8,9 +8,14 @@ test_python3:
     matrix:
       - IMAGE: ['python:3.6-slim', 'python:3.7-slim', 'python:3.8-slim', 'python:3.9-slim']
   script:
-    - pip install pytest
+    - pip install pytest pytest-cov
     - pip install .
-    - pytest
+    - pytest --junitxml=report.xml --cov=foris_schema --cov-report=term 
+  artifacts:
+    reports:
+      junit: report.xml
+      cobertura: coverage.xml
+  coverage: /^TOTAL.*\s+([^\s]+)%$/
 
 test_cli:
   stage: test
@@ -19,6 +24,6 @@ test_cli:
     matrix:
       - IMAGE: ['python:3.6-slim', 'python:3.7-slim', 'python:3.8-slim', 'python:3.9-slim']
   script:
-    - pip install pytest
+    - pip install pytest pytest-cov
     - pip install .
-    - pytest tests/test_cli.py 
+    - pytest tests/test_cli.py

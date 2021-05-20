@@ -55,7 +55,7 @@ setup(
         'pytest-runner',
     ],
     tests_require=[
-        'pytest',
+        'pytest', 'pytest-cov',
     ],
     entry_points={
         'console_scripts': ['foris-schema=foris_schema.cli.__main__:main']
