@@ -25,8 +25,10 @@ from jsonschema import _format as existing_checkers
 
 MAC_RE = r"^([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}$"
 
+format_checker = FormatChecker()
 
-@FormatChecker.cls_checks("ipv4netmask", (socket.error, TypeError))
+
+@format_checker.checks("ipv4netmask", (socket.error, TypeError))
 def check_ipv4netmask(value):
     addr = socket.inet_aton(value)
     addr_int = struct.unpack(">I", addr)[0]
@@ -37,20 +39,20 @@ def check_ipv4netmask(value):
         return True
 
 
-@FormatChecker.cls_checks("ipv4prefix", (socket.error, ValueError, AttributeError))
+@format_checker.checks("ipv4prefix", (socket.error, ValueError, AttributeError))
 def check_ipv4prefix(value):
     address, prefix = value.rsplit("/", 1)
     prefix_num = int(prefix)
     return existing_checkers.is_ipv4(address) and 0 <= prefix_num and prefix_num <= 32
 
 
-@FormatChecker.cls_checks("ipv6prefix", (socket.error, ValueError, AttributeError))
+@format_checker.checks("ipv6prefix", (socket.error, ValueError, AttributeError))
 def check_ipv6prefix(value):
     address, prefix = value.rsplit("/", 1)
     prefix_num = int(prefix)
     return existing_checkers.is_ipv6(address) and 0 <= prefix_num and prefix_num <= 128
 
 
-@FormatChecker.cls_checks("macaddress", (ValueError, TypeError))
+@format_checker.checks("macaddress", (ValueError, TypeError))
 def check_macaddress(value):
     return True if re.match(MAC_RE, value) else False

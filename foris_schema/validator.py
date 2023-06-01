@@ -21,7 +21,7 @@ import os
 from json.decoder import JSONDecodeError
 
 from jsonschema import validate as schema_validate, Draft4Validator, ValidationError
-from .custom_format_checkers import FormatChecker
+from .custom_format_checkers import format_checker
 
 
 BASE_SCHEMA = {
@@ -171,7 +171,7 @@ class ForisValidator(object):
     def _prepare_base_validator(modules_list):
         schema = copy.deepcopy(BASE_SCHEMA)
         schema["properties"]["module"]["enum"] = [e for e in modules_list]
-        return Draft4Validator(schema)
+        return Draft4Validator(schema, format_checker=format_checker)
 
     @staticmethod
     def _prepare_validator(module_name, schema):
@@ -202,7 +202,7 @@ class ForisValidator(object):
                 raise SchemaErrorMutipleTypes(item)
             used.add(item)
 
-        return Draft4Validator(schema, format_checker=FormatChecker())
+        return Draft4Validator(schema, format_checker=format_checker)
 
     @property
     def base_schema(self):
@@ -252,7 +252,7 @@ class ForisValidator(object):
                     module_name, schema)
 
         self.base_validator = ForisValidator._prepare_base_validator(self.validators.keys())
-        self.error_validator = Draft4Validator(ERROR_SCHEMA)
+        self.error_validator = Draft4Validator(ERROR_SCHEMA, format_checker=format_checker)
 
     def validate(self, msg):
         self.base_validator.validate(msg)
@@ -279,7 +279,7 @@ class ForisValidator(object):
                     mini_schema[k] = v
 
                 # This should rise more verbose exception
-                Draft4Validator(mini_schema, format_checker=FormatChecker()).validate(msg)
+                Draft4Validator(mini_schema, format_checker=format_checker).validate(msg)
 
             raise exc  # Raise original exception
 
