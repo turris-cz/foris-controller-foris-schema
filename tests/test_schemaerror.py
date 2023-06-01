@@ -29,6 +29,7 @@ def test_missing_properties():
     with pytest.raises(ForisSchemaValidationError):
         ForisValidator(["tests/schemas/modules/wrong_schema/properties/"])
 
+
 def test_missing_mandatory():
     with pytest.raises(ForisSchemaValidationError):
         ForisValidator(["tests/schemas/modules/wrong_schema/mandatory/"])
@@ -72,7 +73,7 @@ def test_redefinition_two_externals():
         (["tests/schemas/modules/wrong_schema/multiple/"],SchemaErrorMutipleTypes, 'SchemaErrorMutipleTypes'),
         (["tests/schemas/modules/wrong_schema/invalid_json/"], ForisSchemaValidationError, "JSONDecodeError")
     ]
-    )
+)
 def test_error_msg_brief(schema, exception, err_type):
     with pytest.raises(exception) as excinfo:
         ForisValidator(schema)

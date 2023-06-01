@@ -1,4 +1,8 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
 stages:
+  - lint
   - test
 
 tests::unit:
@@ -10,7 +14,7 @@ tests::unit:
   script:
     - pip install pytest pytest-cov
     - pip install .
-    - pytest --junitxml=report.xml --cov=foris_schema --cov-report=term 
+    - pytest --junitxml=report.xml --cov --cov-report=term --cov-report=xml --cov-append
   artifacts:
     reports:
       junit: report.xml
@@ -29,3 +33,11 @@ tests::cli:
     - pip install pytest pytest-cov
     - pip install .
     - pytest tests/test_cli.py
+
+lints::flake8:
+  stage: lint
+  image: python:3.9-slim
+  before_script:
+    - pip install flake8 tox
+  script:
+    - tox -q -e lint

@@ -1,7 +1,6 @@
 import argparse
 import json
 from json.decoder import JSONDecodeError
-import os
 from sys import stdin
 from foris_schema.validator import ForisValidator
 
