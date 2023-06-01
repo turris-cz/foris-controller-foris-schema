@@ -20,7 +20,7 @@ import os
 
 from json.decoder import JSONDecodeError
 
-from jsonschema import validate as schema_validate, Draft4Validator, ValidationError
+from jsonschema import validate as schema_validate, Draft7Validator, ValidationError
 from .custom_format_checkers import format_checker
 
 
@@ -161,7 +161,7 @@ class ForisValidator(object):
                 raise ForisValidationError(
                     "Error loading file {}, reason: {!r}".format(file_path, e)
                 ) from e
-            Draft4Validator.check_schema(schema)
+            Draft7Validator.check_schema(schema)
             for new_definition, data in schema["definitions"].items():
                 if new_definition in definitions:
                     raise SchemaErrorDefinitionAlreadyUsed(new_definition)
@@ -171,7 +171,7 @@ class ForisValidator(object):
     def _prepare_base_validator(modules_list):
         schema = copy.deepcopy(BASE_SCHEMA)
         schema["properties"]["module"]["enum"] = [e for e in modules_list]
-        return Draft4Validator(schema, format_checker=format_checker)
+        return Draft7Validator(schema, format_checker=format_checker)
 
     @staticmethod
     def _prepare_validator(module_name, schema):
@@ -202,7 +202,7 @@ class ForisValidator(object):
                 raise SchemaErrorMutipleTypes(item)
             used.add(item)
 
-        return Draft4Validator(schema, format_checker=format_checker)
+        return Draft7Validator(schema, format_checker=format_checker)
 
     @property
     def base_schema(self):
@@ -246,13 +246,13 @@ class ForisValidator(object):
                         definitions[name] = definition
                 schema["definitions"] = definitions
 
-                Draft4Validator.check_schema(schema)
+                Draft7Validator.check_schema(schema)
 
                 self.validators[module_name] = ForisValidator._prepare_validator(
                     module_name, schema)
 
         self.base_validator = ForisValidator._prepare_base_validator(self.validators.keys())
-        self.error_validator = Draft4Validator(ERROR_SCHEMA, format_checker=format_checker)
+        self.error_validator = Draft7Validator(ERROR_SCHEMA, format_checker=format_checker)
 
     def validate(self, msg):
         self.base_validator.validate(msg)
@@ -279,7 +279,7 @@ class ForisValidator(object):
                     mini_schema[k] = v
 
                 # This should rise more verbose exception
-                Draft4Validator(mini_schema, format_checker=format_checker).validate(msg)
+                Draft7Validator(mini_schema, format_checker=format_checker).validate(msg)
 
             raise exc  # Raise original exception
 
